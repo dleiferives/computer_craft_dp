@@ -1,0 +1,480 @@
+===== ./test/brainfuck.mcfunction =====
+say brainfuck
+# data modify storage
+
+
+# $execute as @e[type=item_display,sort=nearest,limit=1] as @s run data modify entity @s item.components.minecraft:custom_data.$(key) set value $(value)
+
+
+# def run(code: str) -> None:
+#     # keep only valid commands
+#     code = [c for c in code if c in '><+-.,[]']
+#     tape = [0] * 30000
+#     ptr = 0
+#     pc = 0
+#     while pc < len(code):
+#         cmd = code[pc]
+#         if cmd == '>':
+#             ptr += 1
+#             if ptr == len(tape):
+#                 tape.append(0)
+#         elif cmd == '<':
+#             ptr = ptr - 1 if ptr > 0 else 0
+#         elif cmd == '+':
+#             tape[ptr] = (tape[ptr] + 1) % 256
+#         elif cmd == '-':
+#             tape[ptr] = (tape[ptr] - 1) % 256
+#         elif cmd == '.':
+#             sys.stdout.write(chr(tape[ptr]))
+#         elif cmd == ',':
+#             inp = sys.stdin.read(1)
+#             tape[ptr] = ord(inp) if inp else 0
+#         elif cmd == '[' and tape[ptr] == 0:
+#             # jump forward to matching ]
+#             depth = 1
+#             while depth:
+#                 pc += 1
+#                 if code[pc] == '[':
+#                     depth += 1
+#                 elif code[pc] == ']':
+#                     depth -= 1
+#         elif cmd == ']' and tape[ptr] != 0:
+#             # jump back to matching [
+#             depth = 1
+#             while depth:
+#                 pc -= 1
+#                 if code[pc] == '[':
+#                     depth -= 1
+#                 elif code[pc] == ']':
+#                     depth += 1
+#         pc += 1
+
+===== ./tick.mcfunction =====
+#say hi_from_computer_craft
+#execute as @e[type=item_display,sort=nearest] if data entity @s item.components.minecraft:custom_data.mov_counter run say hi
+execute as @e[type=item_display,sort=nearest] if data entity @s item.components.minecraft:custom_data.mov_counter as @s at @s run tp ~ ~0.1 ~
+execute as @e[type=item_display,sort=nearest] if data entity @s item.components.minecraft:custom_data.mov_counter as @s run execute store result score @s computer_craft_dp.movement_sb run data get entity @s item.components.minecraft:custom_data.mov_counter
+execute as @e[type=item_display,sort=nearest] if data entity @s item.components.minecraft:custom_data.mov_counter as @s run execute if score @s computer_craft_dp.movement_sb matches ..0 as @s run data remove entity @s item.components.minecraft:custom_data.mov_counter
+execute as @e[type=item_display,sort=nearest] if data entity @s item.components.minecraft:custom_data.mov_counter as @s run scoreboard players remove @s computer_craft_dp.movement_sb 1
+execute as @e[type=item_display,sort=nearest] if data entity @s item.components.minecraft:custom_data.mov_counter as @s run execute store result entity @s item.components.minecraft:custom_data.mov_counter int 1 run scoreboard players get @s computer_craft_dp.movement_sb
+
+===== ./brainfuck/callback.mcfunction =====
+schedule function computer_craft_dp:brainfuck/main 1t
+
+===== ./brainfuck/map_chars.mcfunction =====
+# inputs
+# $(source) -> the source that the charachter is coming from (must be a single charachter!)
+
+
+data modify storage computer_craft_dp:utils/tmp brainfuck.bmap.translator set value [">","<","+","-",".",",","[","]"]
+
+$execute store success score #tmp computer_craft_dp.brainfuck run data modify storage computer_craft_dp:utils/tmp brainfuck.bmap.translator[0] set from $(source)
+execute if score #tmp computer_craft_dp.brainfuck matches 0..0 run scoreboard players set #ascii_id computer_craft_dp.brainfuck 1
+
+$execute store success score #tmp computer_craft_dp.brainfuck run data modify storage computer_craft_dp:utils/tmp brainfuck.bmap.translator[1] set from $(source)
+execute if score #tmp computer_craft_dp.brainfuck matches 0..0 run scoreboard players set #ascii_id computer_craft_dp.brainfuck 2
+
+$execute store success score #tmp computer_craft_dp.brainfuck run data modify storage computer_craft_dp:utils/tmp brainfuck.bmap.translator[2] set from $(source)
+execute if score #tmp computer_craft_dp.brainfuck matches 0..0 run scoreboard players set #ascii_id computer_craft_dp.brainfuck 3
+
+$execute store success score #tmp computer_craft_dp.brainfuck run data modify storage computer_craft_dp:utils/tmp brainfuck.bmap.translator[3] set from $(source)
+execute if score #tmp computer_craft_dp.brainfuck matches 0..0 run scoreboard players set #ascii_id computer_craft_dp.brainfuck 4
+
+$execute store success score #tmp computer_craft_dp.brainfuck run data modify storage computer_craft_dp:utils/tmp brainfuck.bmap.translator[4] set from $(source)
+execute if score #tmp computer_craft_dp.brainfuck matches 0..0 run scoreboard players set #ascii_id computer_craft_dp.brainfuck 5
+
+$execute store success score #tmp computer_craft_dp.brainfuck run data modify storage computer_craft_dp:utils/tmp brainfuck.bmap.translator[5] set from $(source)
+execute if score #tmp computer_craft_dp.brainfuck matches 0..0 run scoreboard players set #ascii_id computer_craft_dp.brainfuck 6
+
+$execute store success score #tmp computer_craft_dp.brainfuck run data modify storage computer_craft_dp:utils/tmp brainfuck.bmap.translator[6] set from $(source)
+execute if score #tmp computer_craft_dp.brainfuck matches 0..0 run scoreboard players set #ascii_id computer_craft_dp.brainfuck 7
+
+$execute store success score #tmp computer_craft_dp.brainfuck run data modify storage computer_craft_dp:utils/tmp brainfuck.bmap.translator[7] set from $(source)
+execute if score #tmp computer_craft_dp.brainfuck matches 0..0 run scoreboard players set #ascii_id computer_craft_dp.brainfuck 8
+
+===== ./brainfuck/array_helper.mcfunction =====
+# inputs $array_path
+#        $index
+#        $dest
+$execute store result $(dest) run data get storage computer_craft_dp:utils/tmp brainfuck.$(array_path)[$(index)]
+
+===== ./brainfuck/bmap_get_inner.mcfunction =====
+#inputs
+#$dest -> dest
+#$value -> index
+
+$execute store result score $(dest) computer_craft_dp.brainfuck run data get storage computer_craft_dp:utils/tmp brainfuck.bmap.map.$(value) 1
+
+===== ./brainfuck/bmap_stack_push.mcfunction =====
+# inputs
+# $(source) -> scoreboard source!
+
+data modify storage computer_craft_dp:utils/tmp brainfuck.bmap merge value {stack_push:{value:0}}
+$execute store result storage computer_craft_dp:utils/tmp brainfuck.bmap.stack_push.value int 1 run scoreboard players get $(source) computer_craft_dp.brainfuck
+
+function computer_craft_dp:brainfuck/bmap_stack_push_inner with storage computer_craft_dp:utils/tmp brainfuck.bmap.stack_push
+
+===== ./brainfuck/array_setter.mcfunction =====
+# inputs
+# $array_path -> the path to the array
+# $source -> the source that will be written to the thing
+# $indext_dest -> the destination index in the array path
+$execute store result storage computer_craft_dp:utils/tmp brainfuck.$(array_path)[$(index_dest)] int 1 run scoreboard players get $(source)
+
+===== ./brainfuck/array_get.mcfunction =====
+# inputs
+# $array -> The array we're accessing inside of computer_craft_dp:utils/tmp brainfuck
+# $dest -> the  player in the scoreboard computer_craft_dp.brainfuck that we're using
+# $index_source -> the player in the scoreboard computer_craft_dp.brainfuck that we're using for the index
+$data modify storage computer_craft_dp:utils/tmp brainfuck merge value {array_helper:{array_path:"$(array)",dest:"score $(dest) computer_craft_dp.brainfuck",index:0}}
+$execute store result storage computer_craft_dp:utils/tmp brainfuck.array_helper.index int 1 run scoreboard players get $(index_source) computer_craft_dp.brainfuck
+
+function computer_craft_dp:brainfuck/array_helper with storage computer_craft_dp:utils/tmp brainfuck.array_helper
+
+===== ./brainfuck/while_cmd_+.mcfunction =====
+
+===== ./brainfuck/parse_code_inner.mcfunction =====
+# $counter -> the lowest value (current)
+# $prev -> the last value
+#inner:
+$data modify storage computer_craft_dp:utils/tmp brainfuck.code_char set string storage computer_craft_dp:utils/tmp brainfuck.code_string $(counter) $(prev)
+function computer_craft_dp:brainfuck/map_chars {source:"storage computer_craft_dp:utils/tmp brainfuck.code_char"}
+execute store result storage computer_craft_dp:utils/tmp brainfuck.code_id int 1 run scoreboard players get #ascii_id computer_craft_dp.brainfuck
+data modify storage computer_craft_dp:utils/tmp brainfuck.code prepend from storage computer_craft_dp:utils/tmp brainfuck.code_id
+
+execute store result storage computer_craft_dp:utils/tmp brainfuck.parse_code.prev int 1 run scoreboard players get #parse_length computer_craft_dp.brainfuck
+scoreboard players remove #parse_length computer_craft_dp.brainfuck 1
+execute store result storage computer_craft_dp:utils/tmp brainfuck.parse_code.counter int 1 run scoreboard players get #parse_length computer_craft_dp.brainfuck
+execute if score #parse_length computer_craft_dp.brainfuck matches 0.. run function computer_craft_dp:brainfuck/parse_code_inner with storage computer_craft_dp:utils/tmp brainfuck.parse_code
+
+===== ./brainfuck/bmap_stack_push_inner.mcfunction =====
+# inputs
+# $(value) -> the value to push to the stack
+$say pushing $(value)
+$data modify storage computer_craft_dp:utils/tmp brainfuck.bmap.stack prepend value $(value)
+
+===== ./brainfuck/bmap_setter.mcfunction =====
+# inputs
+# $(start) the first position
+# $(pc) -> the current position
+
+
+data modify storage computer_craft_dp:utils/tmp brainfuck.bmap merge value {bmap_setter:{start:0,pc:0}}
+$execute store result storage computer_craft_dp:utils/tmp brainfuck.bmap.bmap_setter.start int 1 run scoreboard players get $(start) computer_craft_dp.brainfuck
+$execute store result storage computer_craft_dp:utils/tmp brainfuck.bmap.bmap_setter.pc int 1 run scoreboard players get $(pc) computer_craft_dp.brainfuck
+
+function computer_craft_dp:brainfuck/bmap_setter_inner with storage computer_craft_dp:utils/tmp brainfuck.bmap.bmap_setter
+
+===== ./brainfuck/cat_output.mcfunction =====
+# inputs
+# $output
+# $output_tmp
+$data modify storage computer_craft_dp:utils/tmp brainfuck.output set value "$(output)$(output_tmp)"
+$say "$(output)$(output_tmp)"
+
+===== ./brainfuck/array_set.mcfunction =====
+# inputs
+# $array -> the array that we're going to set and entry to
+# $index_dest -> the destination index held in a scoreboard
+# $source -> the scoreboard source
+
+$data modify storage computer_craft_dp:utils/tmp brainfuck merge value {array_setter:{array_path:"$(array)",source:"$(source) computer_craft_dp.brainfuck",index_dest:0}}
+$execute store result storage computer_craft_dp:utils/tmp brainfuck.array_setter.index_dest int 1 run scoreboard players get $(index_dest) computer_craft_dp.brainfuck
+
+function computer_craft_dp:brainfuck/array_setter with storage computer_craft_dp:utils/tmp brainfuck.array_setter
+
+===== ./brainfuck/while_cmd_-.mcfunction =====
+function computer_craft_dp:brainfuck/array_get {dest:"#tmp",array:"tape",index_source:"#ptr"}
+scoreboard players remove #tmp computer_craft_dp.brainfuck 1
+scoreboard players operation #tmp computer_craft_dp.brainfuck %= #256 computer_craft_dp.brainfuck
+execute if score #tmp computer_craft_dp.brainfuck matches ..0 run scoreboard players set #tmp computer_craft_dp.brainfuck 0
+function computer_craft_dp:brainfuck/array_set {array:"tape",index_dest:"#ptr",source:"#tmp"}
+
+===== ./brainfuck/parse_code.mcfunction =====
+scoreboard players set #parse_len computer_craft_dp.brainfuck 0
+execute store result score #parse_length computer_craft_dp.brainfuck run data get storage computer_craft_dp:utils/tmp brainfuck.code_string
+data modify storage computer_craft_dp:utils/tmp brainfuck merge value {parse_code:{counter:0,prev:0}}
+execute store result storage computer_craft_dp:utils/tmp brainfuck.parse_code.prev int 1 run scoreboard players get #parse_length computer_craft_dp.brainfuck
+scoreboard players remove #parse_length computer_craft_dp.brainfuck 1
+execute store result storage computer_craft_dp:utils/tmp brainfuck.parse_code.counter int 1 run scoreboard players get #parse_length computer_craft_dp.brainfuck
+execute if score #parse_length computer_craft_dp.brainfuck matches 0.. run function computer_craft_dp:brainfuck/parse_code_inner with storage computer_craft_dp:utils/tmp brainfuck.parse_code
+
+===== ./brainfuck/bmap_stack_pop.mcfunction =====
+# inputs
+# $(dest) -> destination to write to!
+
+$say popping $(dest)
+$execute store result $(dest) run data get storage computer_craft_dp:utils/tmp brainfuck.bmap.stack[0]
+data remove storage computer_craft_dp:utils/tmp brainfuck.bmap.stack[0]
+
+===== ./brainfuck/loop/dot.mcfunction =====
+# #         elif cmd == '.':
+# #             sys.stdout.write(chr(tape[ptr]))
+function computer_craft_dp:brainfuck/array_get {dest:"#tmp",array:"tape",index_source:"#ptr"}
+function computer_craft_dp:utils/string/to_ascii {id:"#tmp",dest:"computer_craft_dp:utils/tmp brainfuck.output_tmp"}
+function computer_craft_dp:brainfuck/cat_output with storage computer_craft_dp:utils/tmp brainfuck
+
+===== ./brainfuck/loop/close.mcfunction =====
+#     if tape[ptr] != 0:
+#         pc = bracket_map[pc]
+function computer_craft_dp:brainfuck/array_get {dest:"#tmp",array:"tape",index_source:"#ptr"}
+execute if score #tmp computer_craft_dp.brainfuck matches ..-1 run function computer_craft_dp:brainfuck/bmap_get {source:"#pc",dest:"#pc"}
+execute if score #tmp computer_craft_dp.brainfuck matches 1.. run function computer_craft_dp:brainfuck/bmap_get {source:"#pc",dest:"#pc"}
+
+===== ./brainfuck/loop/minus.mcfunction =====
+# #         elif cmd == '-':
+# #             tape[ptr] = (tape[ptr] - 1) % 256
+say minus
+function computer_craft_dp:brainfuck/array_get {dest:"#tmp",array:"tape",index_source:"#ptr"}
+scoreboard players remove #tmp computer_craft_dp.brainfuck 1
+scoreboard players operation #tmp computer_craft_dp.brainfuck %= #256 computer_craft_dp.brainfuck
+execute if score #tmp computer_craft_dp.brainfuck matches ..0 run scoreboard players set #tmp computer_craft_dp.brainfuck 0
+function computer_craft_dp:brainfuck/array_set {array:"tape",index_dest:"#ptr",source:"#tmp"}
+
+===== ./brainfuck/loop/plus.mcfunction =====
+# #         elif cmd == '+':
+# #             tape[ptr] = (tape[ptr] + 1) % 256
+say plus
+function computer_craft_dp:brainfuck/array_get {dest:"#tmp",array:"tape",index_source:"#ptr"}
+scoreboard players add #tmp computer_craft_dp.brainfuck 1
+scoreboard players operation #tmp computer_craft_dp.brainfuck %= #256 computer_craft_dp.brainfuck
+execute if score #tmp computer_craft_dp.brainfuck matches ..0 run scoreboard players set #tmp computer_craft_dp.brainfuck 0
+function computer_craft_dp:brainfuck/array_set {array:"tape",index_dest:"#ptr",source:"#tmp"}
+
+===== ./brainfuck/loop/inc.mcfunction =====
+# #         if cmd == '>':
+# #             ptr += 1
+# #             if ptr == len(tape):
+# #                 tape.append(0)
+say inc
+scoreboard players add #ptr computer_craft_dp.brainfuck 1
+execute store result score #tmp computer_craft_dp.brainfuck run data get storage computer_craft_dp:utils/tmp brainfuck.tape 1
+execute if score #ptr computer_craft_dp.brainfuck = #tmp computer_craft_dp.brainfuck run data modify storage computer_craft_dp:utils/tmp brainfuck.tape append value 0
+
+===== ./brainfuck/loop/open.mcfunction =====
+    # elif cmd == '[':
+    #     if tape[ptr] == 0:
+    #         pc = bracket_map[pc]
+function computer_craft_dp:brainfuck/array_get {dest:"#tmp",array:"tape",index_source:"#ptr"}
+execute if score #tmp computer_craft_dp.brainfuck matches 0..0 run function computer_craft_dp:brainfuck/bmap_get {source:"#pc",dest:"#pc"}
+
+===== ./brainfuck/loop/dec.mcfunction =====
+# #         elif cmd == '<':
+# #             ptr = ptr - 1 if ptr > 0 else 0
+say dec
+execute if score #ptr computer_craft_dp.brainfuck matches 1.. run scoreboard players remove #ptr computer_craft_dp.brainfuck 1
+execute if score #ptr computer_craft_dp.brainfuck matches ..0 run scoreboard players set #ptr computer_craft_dp.brainfuck 0
+
+===== ./brainfuck/bmap_get.mcfunction =====
+# inputs
+# $(source) -> scoreboard source!
+# $(dest) -> scoreboard dest!
+
+$data modify storage computer_craft_dp:utils/tmp brainfuck.bmap merge value {get:{dest:"$(dest)",value:0}}
+$execute store result storage computer_craft_dp:utils/tmp brainfuck.bmap.get.value int 1 run scoreboard players get $(source) computer_craft_dp.brainfuck
+
+function computer_craft_dp:brainfuck/bmap_get_inner with storage computer_craft_dp:utils/tmp brainfuck.bmap.get
+
+===== ./brainfuck/bmap_setup.mcfunction =====
+
+scoreboard players set #cmd computer_craft_dp.brainfuck 0
+function computer_craft_dp:brainfuck/array_get {dest:"#cmd",array:"code",index_source:"#pc"}
+
+#    bracket_map = {}
+#    stack = []
+#    for pos, cmd in enumerate(code):
+#        if cmd == '[':
+#            stack.append(pos)
+execute if score #cmd computer_craft_dp.brainfuck matches 7..7 run function computer_craft_dp:brainfuck/bmap_stack_push {source:"#pc"}
+
+#        elif cmd == ']':
+#            if not stack:
+#                raise SyntaxError(f"Unmatched ']' at position {pos}")
+#            bmap_tmp = stack.pop()
+#            bracket_map[bmap_tmp] = pos
+#            bracket_map[pos] = bmap_tmp
+
+execute if score #cmd computer_craft_dp.brainfuck matches 8..8 run function computer_craft_dp:brainfuck/bmap_stack_pop {dest:"score #bmap_tmp computer_craft_dp.brainfuck"}
+execute if score #cmd computer_craft_dp.brainfuck matches 8..8 run function computer_craft_dp:brainfuck/bmap_setter {start:"#bmap_tmp",pc:"#pc"}
+
+scoreboard players add #pc computer_craft_dp.brainfuck 1
+execute if score #cmd computer_craft_dp.brainfuck matches 0..0 run say Bmap setup
+execute if score #cmd computer_craft_dp.brainfuck matches 0..0 run data get storage computer_craft_dp:utils/tmp brainfuck.bmap
+
+execute if score #cmd computer_craft_dp.brainfuck matches 1.. run function computer_craft_dp:brainfuck/bmap_setup
+
+===== ./brainfuck/bmap_setter_inner.mcfunction =====
+#inputs
+# $start -> the start index
+# $pc -> the pc index
+
+$say setting $(start) $(pc)
+
+$data modify storage computer_craft_dp:utils/tmp brainfuck.bmap.map.$(start) set value $(pc)
+$data modify storage computer_craft_dp:utils/tmp brainfuck.bmap.map.$(pc) set value $(start)
+
+===== ./brainfuck/main.mcfunction =====
+# #     while pc < len(code):
+# #         cmd = code[pc]
+scoreboard players set #cmd computer_craft_dp.brainfuck 0
+function computer_craft_dp:brainfuck/array_get {dest:"#cmd",array:"code",index_source:"#pc"}
+
+# #         if cmd == '>':
+execute if score #cmd computer_craft_dp.brainfuck matches 1..1 run function computer_craft_dp:brainfuck/loop/inc
+# #         elif cmd == '<':
+execute if score #cmd computer_craft_dp.brainfuck matches 2..2 run function computer_craft_dp:brainfuck/loop/dec
+# #         elif cmd == '+':
+execute if score #cmd computer_craft_dp.brainfuck matches 3..3 run function computer_craft_dp:brainfuck/loop/plus
+# #         elif cmd == '-':
+execute if score #cmd computer_craft_dp.brainfuck matches 4..4 run function computer_craft_dp:brainfuck/loop/minus
+
+# #         elif cmd == '.':
+execute if score #cmd computer_craft_dp.brainfuck matches 5..5 run function computer_craft_dp:brainfuck/loop/dot
+
+# #         elif cmd == ',':
+# #             inp = sys.stdin.read(1)
+# #             tape[ptr] = ord(inp) if inp else 0
+# function computer_craft_dp:brainfuck/array_set {array:"tape",index_dest:"#ptr",source:"TODO"}
+
+    # elif cmd == '[':
+
+execute if score #cmd computer_craft_dp.brainfuck matches 7..7 run function computer_craft_dp:brainfuck/loop/open
+    # elif cmd == ']':
+execute if score #cmd computer_craft_dp.brainfuck matches 8..8 run function computer_craft_dp:brainfuck/loop/close
+    #     if tape[ptr] != 0:
+    #         pc = bracket_map[pc]
+
+# #         pc += 1
+scoreboard players add #pc computer_craft_dp.brainfuck 1
+
+execute if score #cmd computer_craft_dp.brainfuck matches 0..0 run say Stopping execution nop encountered
+execute if score #cmd computer_craft_dp.brainfuck matches 0..0 run schedule clear computer_craft_dp:brainfuck/main
+execute if score #cmd computer_craft_dp.brainfuck matches 1.. run function computer_craft_dp:brainfuck/main
+execute if score #cmd computer_craft_dp.brainfuck matches 1.. run schedule function computer_craft_dp:brainfuck/main 1t
+
+===== ./load.mcfunction =====
+say loaded
+
+===== ./brainfuck.mcfunction =====
+say brainfuck
+data modify storage computer_craft_dp:utils/tmp brainfuck merge value {tape:[]}
+say tape
+function computer_craft_dp:utils/create_zeros_list {path:"brainfuck.tape",length:30}
+data modify storage computer_craft_dp:utils/tmp brainfuck merge value {code:[]}
+#[1, 3, 3, 3, 3, 3, 3, 3, 3, 7, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 1, 4, 8, 2, 5, 1, 3, 3, 3, 3, 7, 2, 3, 3, 3, 3, 3, 3, 3, 1, 4, 8, 2, 3, 5, 3, 3, 3, 3, 3, 3, 3, 5, 5, 3, 3, 3, 5, 1, 1, 3, 3, 3, 3, 3, 3, 7, 2, 3, 3, 3, 3, 3, 3, 3, 1, 4, 8, 2, 3, 3, 5, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 5, 1, 3, 3, 3, 3, 3, 3, 7, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 1, 4, 8, 2, 3, 5, 2, 5, 3, 3, 3, 5, 4, 4, 4, 4, 4, 4, 5, 4, 4, 4, 4, 4, 4, 4, 4, 5, 1, 1, 1, 3, 3, 3, 3, 7, 2, 3, 3, 3, 3, 3, 3, 3, 3, 1, 4, 8, 2, 3, 5]}
+data modify storage computer_craft_dp:utils/tmp brainfuck merge value {output:""}
+data modify storage computer_craft_dp:utils/tmp brainfuck merge value {output_tmp:""}
+data modify storage computer_craft_dp:utils/tmp brainfuck merge value {bmap:{stack:[],stack_push:{},map:{}}}
+execute store success storage computer_craft_dp:utils/tmp brainfuck.success int 1 run scoreboard objectives add computer_craft_dp.brainfuck dummy
+say scoreboard
+scoreboard players set #ptr computer_craft_dp.brainfuck 0
+scoreboard players set #cmd computer_craft_dp.brainfuck 1
+scoreboard players set #pc computer_craft_dp.brainfuck 0
+scoreboard players set #depth computer_craft_dp.brainfuck 0
+scoreboard players set #tmp computer_craft_dp.brainfuck 0
+scoreboard players set #256 computer_craft_dp.brainfuck 256
+scoreboard players set #0 computer_craft_dp.brainfuck 0
+scoreboard players set #1 computer_craft_dp.brainfuck 1
+scoreboard players set #2 computer_craft_dp.brainfuck 2
+scoreboard players set #3 computer_craft_dp.brainfuck 3
+scoreboard players set #4 computer_craft_dp.brainfuck 4
+scoreboard players set #5 computer_craft_dp.brainfuck 5
+
+function computer_craft_dp:utils/stringlib
+
+
+scoreboard players set #code_at_pc computer_craft_dp.brainfuck 0
+
+execute store result score #code_len computer_craft_dp.brainfuck run data get storage computer_craft_dp:utils/tmp brainfuck.code
+#execute store result score #cmd computer_craft_dp.brainfuck run data get storage computer_craft_dp:utils/tmp brainfuck.code
+
+#TODO: add string to array
+data modify storage computer_craft_dp:utils/tmp brainfuck merge value {code_string:""}
+
+function computer_craft_dp:utils/readbook
+data modify storage computer_craft_dp:utils/tmp brainfuck.code_string set from storage computer_craft_dp:utils/tmp stringlib.readbook.full_text
+function computer_craft_dp:brainfuck/parse_code
+
+# # def run(code: str) -> None:
+# #     # keep only valid commands
+# #     code = [c for c in code if c in '><+-.,[]']
+# #     tape = [0] * 30000
+# #     ptr = 0
+# #     pc = 0
+
+data modify storage computer_craft_dp:utils/tmp brainfuck.bmap set value {bmap:{stack:[],stack_push:{},map:{}}}
+scoreboard players set #pc computer_craft_dp.brainfuck 0
+function computer_craft_dp:brainfuck/bmap_setup
+scoreboard players set #pc computer_craft_dp.brainfuck 0
+say map setup!
+
+function computer_craft_dp:brainfuck/main
+
+===== ./create_computer.mcfunction =====
+$summon item_display $(x) $(y) $(z) {transformation:{left_rotation:[0f,0f,0f,1f],right_rotation:[0f,0f,0f,1f],translation:[0f,0.5f,0f],scale:[1.01f,1.01f,1.01f]}, item:{id:"minecraft:item_frame",count:1, components:{"minecraft:custom_data":{"computer_craft_dp_block":"computer"}, "minecraft:item_model":"computer_craft_rp:computer"}}}
+
+===== ./setvalue.mcfunction =====
+$execute as @e[type=item_display,sort=nearest,limit=1] as @s run data modify entity @s item.components.minecraft:custom_data.$(key) set value $(value)
+
+===== ./utils/readbook_inner.mcfunction =====
+# inputs
+# $(page_number)
+# $(full_text)
+# $(page_text)
+$data modify storage computer_craft_dp:utils/tmp stringlib.readbook.full_text set value "$(page_text)$(full_text)"
+$data modify storage computer_craft_dp:utils/tmp stringlib.readbook.page_text set from storage computer_craft_dp:utils/tmp stringlib.readbook.pages[$(page_number)].raw
+scoreboard players remove test computer_craft_dp.brainfuck 1
+execute store result storage computer_craft_dp:utils/tmp stringlib.readbook.page_number int 1 run scoreboard players get test computer_craft_dp.brainfuck
+execute if score test computer_craft_dp.brainfuck matches -1.. run function computer_craft_dp:utils/readbook_inner with storage computer_craft_dp:utils/tmp stringlib.readbook
+
+===== ./utils/stringlib.mcfunction =====
+# setup the stringlib
+data modify storage computer_craft_dp:utils/tmp stringlib merge value {ascii_lut:['\x00', '\x01', '\x02', '\x03', '\x04', '\x05', '\x06', '\x07', '\x08', '\t', '\n', '\x0b', '\x0c', '\r', '\x0e', '\x0f', '\x10', '\x11', '\x12', '\x13', '\x14', '\x15', '\x16', '\x17', '\x18', '\x19', '\x1a', '\x1b', '\x1c', '\x1d', '\x1e', '\x1f', ' ', '!', '"', '#', '$', '%', '&', "'", '(', ')', '*', '+', ',', '-', '.', '/', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ':', ';', '<', '=', '>', '?', '@', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '[', '\\', ']', '^', '_', '`', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '{', '|', '}', '~', '\x7f', '\x80', '\x81', '\x82', '\x83', '\x84', '\x85', '\x86', '\x87', '\x88', '\x89', '\x8a', '\x8b', '\x8c', '\x8d', '\x8e', '\x8f', '\x90', '\x91', '\x92', '\x93', '\x94', '\x95', '\x96', '\x97', '\x98', '\x99', '\x9a', '\x9b', '\x9c', '\x9d', '\x9e', '\x9f', '\xa0', '¡', '¢', '£', '¤', '¥', '¦', '§', '¨', '©', 'ª', '«', '¬', '\xad', '®', '¯', '°', '±', '²', '³', '´', 'µ', '¶', '·', '¸', '¹', 'º', '»', '¼', '½', '¾', '¿', 'À', 'Á', 'Â', 'Ã', 'Ä', 'Å', 'Æ', 'Ç', 'È', 'É', 'Ê', 'Ë', 'Ì', 'Í', 'Î', 'Ï', 'Ð', 'Ñ', 'Ò', 'Ó', 'Ô', 'Õ', 'Ö', '×', 'Ø', 'Ù', 'Ú', 'Û', 'Ü', 'Ý', 'Þ', 'ß', 'à', 'á', 'â', 'ã', 'ä', 'å', 'æ', 'ç', 'è', 'é', 'ê', 'ë', 'ì', 'í', 'î', 'ï', 'ð', 'ñ', 'ò', 'ó', 'ô', 'õ', 'ö', '÷', 'ø', 'ù', 'ú', 'û', 'ü', 'ý', 'þ', 'ÿ']}
+
+===== ./utils/string/to_ascii_inner.mcfunction =====
+# requires stringlib to have been setup before this call
+# arguments
+# $(id) INT -> the number that we're converting to an ascii value, comes from a brainfuck scoreboard
+# $(dest) the destination that we're sticking this into, must be a storage
+
+$data modify storage $(dest) set from storage computer_craft_dp:utils/tmp stringlib.ascii_lut[$(id)]
+
+===== ./utils/string/to_ascii.mcfunction =====
+# requires stringlib to have been setup before this call
+# arguments
+# $(id) INT -> the number that we're converting to an ascii value, comes from a brainfuck scoreboard
+# $(dest) the destination that we're sticking this into, must be a storage
+
+$data modify storage computer_craft_dp:utils/tmp stringlib merge value {to_ascii:{dest:"$(dest)",id:0}}
+$execute store result storage computer_craft_dp:utils/tmp stringlib.to_ascii.id int 1 run scoreboard players get $(id) computer_craft_dp.brainfuck
+
+function computer_craft_dp:utils/string/to_ascii_inner with storage computer_craft_dp:utils/tmp stringlib.to_ascii
+
+===== ./utils/readbook.mcfunction =====
+execute store result score test computer_craft_dp.brainfuck run data get entity @p SelectedItem.components.minecraft:writable_book_content.pages
+data modify storage computer_craft_dp:utils/tmp stringlib.readbook.pages set from entity Itra SelectedItem.components.minecraft:writable_book_content.pages
+data modify storage computer_craft_dp:utils/tmp stringlib.readbook.full_text set value ""
+data modify storage computer_craft_dp:utils/tmp stringlib.readbook.page_text set value ""
+scoreboard players remove test computer_craft_dp.brainfuck 1
+execute store result storage computer_craft_dp:utils/tmp stringlib.readbook.page_number int 1 run scoreboard players get test computer_craft_dp.brainfuck
+execute if score test computer_craft_dp.brainfuck matches 0.. run function computer_craft_dp:utils/readbook_inner with storage computer_craft_dp:utils/tmp stringlib.readbook
+
+===== ./utils/create_zeros_list.mcfunction =====
+$data remove storage computer_craft_dp:utils/tmp $(path)
+$data modify storage computer_craft_dp:utils/tmp $(path) set value []
+
+scoreboard objectives add computer_craft_dp.utils.tmp dummy
+$scoreboard players set #list_length computer_craft_dp.utils.tmp $(length)
+scoreboard players set #list_index computer_craft_dp.utils.tmp 0
+
+
+$function computer_craft_dp:utils/zero_list_loop {path:$(path)}
+
+===== ./utils/zero_list_loop.mcfunction =====
+$execute if score #list_index computer_craft_dp.utils.tmp < #list_length computer_craft_dp.utils.tmp run data modify storage computer_craft_dp:utils/tmp $(path) append value 0
+execute if score #list_index computer_craft_dp.utils.tmp < #list_length computer_craft_dp.utils.tmp run scoreboard players add #list_index computer_craft_dp.utils.tmp 1
+$execute if score #list_index computer_craft_dp.utils.tmp < #list_length computer_craft_dp.utils.tmp run function computer_craft_dp:utils/zero_list_loop {path:$(path)}
+
+===== ./move_computer.mcfunction =====
+data modify entity @e[sort=nearest,type=minecraft:item_display,limit=1] item.components.minecraft:custom_data.mov_counter set value 10
+
