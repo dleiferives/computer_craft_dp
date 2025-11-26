@@ -1,0 +1,1 @@
+A datapack that I want to make. Essentially the computer craft mod but in a datapack form. For the moment it has a functioning brainfuck interpreter. This project spawned another project of mine, namely a [*Minecraft Datapack Language*](https://github.com/dleiferives/mdl).
